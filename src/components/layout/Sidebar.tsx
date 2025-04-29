@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import {
   Sidebar as SidebarComponent,
   SidebarContent,
@@ -29,11 +29,13 @@ import {
 import { Button } from '@/components/ui/button';
 
 const Sidebar: React.FC = () => {
+  const location = useLocation();
+  
   const menuItems = [
     { 
       title: 'Dashboard', 
       icon: PieChart, 
-      path: '/' 
+      path: '/dashboard' 
     },
     { 
       title: 'Expenses', 
@@ -89,7 +91,10 @@ const Sidebar: React.FC = () => {
               {menuItems.map((item) => (
                 <SidebarMenuItem key={item.path}>
                   <SidebarMenuButton asChild>
-                    <Link to={item.path} className="flex items-center">
+                    <Link 
+                      to={item.path} 
+                      className={`flex items-center ${location.pathname === item.path ? 'bg-accent text-accent-foreground' : ''}`}
+                    >
                       <item.icon className="mr-2 h-5 w-5" />
                       <span>{item.title}</span>
                     </Link>
