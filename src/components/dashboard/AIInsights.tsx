@@ -22,7 +22,7 @@ const AIInsights: React.FC = () => {
     },
     {
       id: 'i2',
-      text: 'Congratulations! You've reached 50% of your emergency fund goal.',
+      text: "Congratulations! You've reached 50% of your emergency fund goal.",
       type: 'positive',
     },
     {
