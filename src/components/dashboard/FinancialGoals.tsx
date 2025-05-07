@@ -1,9 +1,28 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
-import { PiggyBank, Plane, Car, Home } from 'lucide-react';
+import { PiggyBank, Plane, Car, Home, Plus } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { useToast } from '@/hooks/use-toast';
 
 interface Goal {
   id: string;
@@ -17,7 +36,13 @@ interface Goal {
 }
 
 const FinancialGoals: React.FC = () => {
-  const goals: Goal[] = [
+  const { toast } = useToast();
+  const [isAddGoalOpen, setIsAddGoalOpen] = useState(false);
+  const [isContributeOpen, setIsContributeOpen] = useState(false);
+  const [selectedGoalId, setSelectedGoalId] = useState<string | null>(null);
+  const [contributionAmount, setContributionAmount] = useState('');
+  
+  const [goals, setGoals] = useState<Goal[]>([
     {
       id: 'g1',
       title: 'Emergency Fund',
@@ -58,7 +83,14 @@ const FinancialGoals: React.FC = () => {
       iconBg: 'bg-budget-orange/10 text-budget-orange',
       priority: 'High',
     },
-  ];
+  ]);
+
+  const [newGoal, setNewGoal] = useState({
+    title: '',
+    targetAmount: '',
+    dueDate: '',
+    priority: 'Medium' as 'High' | 'Medium' | 'Low',
+  });
 
   // Calculate progress percentage
   const calculateProgress = (current: number, target: number): number => {
@@ -88,11 +120,107 @@ const FinancialGoals: React.FC = () => {
     }
   };
 
+  const handleAddGoal = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!newGoal.title || !newGoal.targetAmount || !newGoal.dueDate) {
+      toast({
+        title: "Error",
+        description: "Please fill in all fields",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const iconOptions = [
+      { icon: <PiggyBank className="h-4 w-4" />, bg: 'bg-budget-blue/10 text-budget-blue' },
+      { icon: <Plane className="h-4 w-4" />, bg: 'bg-budget-purple/10 text-budget-purple' },
+      { icon: <Car className="h-4 w-4" />, bg: 'bg-budget-green/10 text-budget-green' },
+      { icon: <Home className="h-4 w-4" />, bg: 'bg-budget-orange/10 text-budget-orange' },
+    ];
+    
+    const randomIcon = iconOptions[Math.floor(Math.random() * iconOptions.length)];
+    
+    const newGoalObj: Goal = {
+      id: `g${goals.length + 1}`,
+      title: newGoal.title,
+      targetAmount: parseFloat(newGoal.targetAmount),
+      currentAmount: 0,
+      dueDate: newGoal.dueDate,
+      icon: randomIcon.icon,
+      iconBg: randomIcon.bg,
+      priority: newGoal.priority,
+    };
+    
+    setGoals([...goals, newGoalObj]);
+    setNewGoal({
+      title: '',
+      targetAmount: '',
+      dueDate: '',
+      priority: 'Medium',
+    });
+    
+    setIsAddGoalOpen(false);
+    
+    toast({
+      title: "Goal Added",
+      description: `${newGoal.title} added to your financial goals`,
+    });
+  };
+
+  const openContributeDialog = (goalId: string) => {
+    setSelectedGoalId(goalId);
+    setIsContributeOpen(true);
+  };
+
+  const handleContribute = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!contributionAmount || !selectedGoalId) {
+      toast({
+        title: "Error",
+        description: "Please enter a valid amount",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    const amount = parseFloat(contributionAmount);
+    if (isNaN(amount) || amount <= 0) {
+      toast({
+        title: "Error",
+        description: "Please enter a valid amount",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setGoals(goals.map(goal => 
+      goal.id === selectedGoalId 
+        ? { ...goal, currentAmount: goal.currentAmount + amount } 
+        : goal
+    ));
+    
+    setContributionAmount('');
+    setIsContributeOpen(false);
+    
+    const goalTitle = goals.find(g => g.id === selectedGoalId)?.title;
+    toast({
+      title: "Contribution Added",
+      description: `Added ₹${amount.toLocaleString('en-IN')} to ${goalTitle}`,
+    });
+  };
+
   return (
-    <Card className="col-span-full">
-      <CardHeader>
-        <CardTitle>Financial Goals</CardTitle>
-        <CardDescription>Track your progress towards your financial milestones</CardDescription>
+    <Card className="col-span-full mb-6">
+      <CardHeader className="flex flex-row items-center justify-between pb-2">
+        <div>
+          <CardTitle>Financial Goals</CardTitle>
+          <CardDescription>Track your progress towards your financial milestones</CardDescription>
+        </div>
+        <Button variant="outline" size="sm" onClick={() => setIsAddGoalOpen(true)}>
+          <Plus className="mr-1 h-4 w-4" /> Add Goal
+        </Button>
       </CardHeader>
       <CardContent>
         <div className="space-y-6">
@@ -118,7 +246,13 @@ const FinancialGoals: React.FC = () => {
                       </p>
                     </div>
                   </div>
-                  <span className="text-sm font-medium">{progress}%</span>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => openContributeDialog(goal.id)}
+                  >
+                    Add Funds
+                  </Button>
                 </div>
                 
                 <div className="space-y-1">
@@ -132,6 +266,120 @@ const FinancialGoals: React.FC = () => {
             );
           })}
         </div>
+
+        {/* Add Goal Dialog */}
+        <Dialog open={isAddGoalOpen} onOpenChange={setIsAddGoalOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Add New Financial Goal</DialogTitle>
+              <DialogDescription>
+                Create a new savings goal to track your progress.
+              </DialogDescription>
+            </DialogHeader>
+            <form onSubmit={handleAddGoal}>
+              <div className="grid gap-4 py-4">
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="title" className="text-right">
+                    Goal Title
+                  </Label>
+                  <Input
+                    id="title"
+                    value={newGoal.title}
+                    onChange={(e) => setNewGoal({...newGoal, title: e.target.value})}
+                    className="col-span-3"
+                    placeholder="New Car, Emergency Fund, etc."
+                  />
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="amount" className="text-right">
+                    Target Amount (₹)
+                  </Label>
+                  <Input
+                    id="amount"
+                    type="number"
+                    value={newGoal.targetAmount}
+                    onChange={(e) => setNewGoal({...newGoal, targetAmount: e.target.value})}
+                    className="col-span-3"
+                    placeholder="500000"
+                  />
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="dueDate" className="text-right">
+                    Target Date
+                  </Label>
+                  <Input
+                    id="dueDate"
+                    type="date"
+                    value={newGoal.dueDate}
+                    onChange={(e) => setNewGoal({...newGoal, dueDate: e.target.value})}
+                    className="col-span-3"
+                  />
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="priority" className="text-right">
+                    Priority
+                  </Label>
+                  <Select
+                    value={newGoal.priority}
+                    onValueChange={(value: 'High' | 'Medium' | 'Low') => 
+                      setNewGoal({...newGoal, priority: value})
+                    }
+                  >
+                    <SelectTrigger className="col-span-3">
+                      <SelectValue placeholder="Select priority" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="High">High</SelectItem>
+                      <SelectItem value="Medium">Medium</SelectItem>
+                      <SelectItem value="Low">Low</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <DialogFooter>
+                <Button variant="outline" type="button" onClick={() => setIsAddGoalOpen(false)}>
+                  Cancel
+                </Button>
+                <Button type="submit">Add Goal</Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
+
+        {/* Contribute Dialog */}
+        <Dialog open={isContributeOpen} onOpenChange={setIsContributeOpen}>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Add Contribution</DialogTitle>
+              <DialogDescription>
+                Add funds to your savings goal.
+              </DialogDescription>
+            </DialogHeader>
+            <form onSubmit={handleContribute}>
+              <div className="grid gap-4 py-4">
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="contribution" className="text-right">
+                    Amount (₹)
+                  </Label>
+                  <Input
+                    id="contribution"
+                    type="number"
+                    value={contributionAmount}
+                    onChange={(e) => setContributionAmount(e.target.value)}
+                    className="col-span-3"
+                    placeholder="10000"
+                  />
+                </div>
+              </div>
+              <DialogFooter>
+                <Button variant="outline" type="button" onClick={() => setIsContributeOpen(false)}>
+                  Cancel
+                </Button>
+                <Button type="submit">Add Funds</Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
       </CardContent>
     </Card>
   );

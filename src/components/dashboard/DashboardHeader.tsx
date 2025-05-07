@@ -11,8 +11,32 @@ import {
   DropdownMenuTrigger 
 } from '@/components/ui/dropdown-menu';
 import { PlusCircle } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
-const DashboardHeader: React.FC = () => {
+interface DashboardHeaderProps {
+  onAddExpense?: () => void;
+}
+
+const DashboardHeader: React.FC<DashboardHeaderProps> = ({ onAddExpense }) => {
+  const navigate = useNavigate();
+
+  const handleMenuAction = (action: string) => {
+    switch(action) {
+      case 'profile':
+        navigate('/settings');
+        break;
+      case 'settings':
+        navigate('/settings');
+        break;
+      case 'signout':
+        // In a real app, this would handle sign out logic
+        navigate('/auth');
+        break;
+      default:
+        break;
+    }
+  };
+
   return (
     <div className="flex flex-col space-y-4 md:flex-row md:items-center md:justify-between md:space-y-0 mb-8">
       <div>
@@ -20,7 +44,11 @@ const DashboardHeader: React.FC = () => {
         <p className="text-muted-foreground">Welcome back, Rahul! Here's your financial overview.</p>
       </div>
       <div className="flex items-center space-x-3">
-        <Button size="sm" className="flex items-center gap-1">
+        <Button 
+          size="sm" 
+          className="flex items-center gap-1"
+          onClick={onAddExpense}
+        >
           <PlusCircle className="h-4 w-4" />
           <span>Add Expense</span>
         </Button>
@@ -34,10 +62,15 @@ const DashboardHeader: React.FC = () => {
           <DropdownMenuContent align="end" className="w-56">
             <DropdownMenuLabel>My Account</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>Profile</DropdownMenuItem>
-            <DropdownMenuItem>Settings</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleMenuAction('profile')}>Profile</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleMenuAction('settings')}>Settings</DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-destructive">Sign out</DropdownMenuItem>
+            <DropdownMenuItem 
+              className="text-destructive"
+              onClick={() => handleMenuAction('signout')}
+            >
+              Sign out
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

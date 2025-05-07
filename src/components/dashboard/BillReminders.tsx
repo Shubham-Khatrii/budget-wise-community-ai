@@ -18,35 +18,35 @@ const BillReminders: React.FC = () => {
     {
       id: 'b1',
       title: 'Electricity Bill',
-      amount: 98.75,
+      amount: 3499.75,
       dueDate: '2025-05-05',
       status: 'Pending',
     },
     {
       id: 'b2',
       title: 'Water Bill',
-      amount: 45.30,
+      amount: 1235.30,
       dueDate: '2025-05-10',
       status: 'Pending',
     },
     {
       id: 'b3',
       title: 'Internet & Cable',
-      amount: 89.99,
+      amount: 2199.99,
       dueDate: '2025-05-15',
       status: 'Pending',
     },
     {
       id: 'b4',
-      title: 'Cell Phone',
-      amount: 75.00,
+      title: 'Mobile Recharge',
+      amount: 999.00,
       dueDate: '2025-05-22',
       status: 'Pending',
     },
     {
       id: 'b5',
       title: 'Streaming Services',
-      amount: 23.98,
+      amount: 649.98,
       dueDate: '2025-05-28',
       status: 'Pending',
     }
@@ -55,7 +55,7 @@ const BillReminders: React.FC = () => {
   // Format date to a more readable format
   const formatDate = (dateString: string): string => {
     const date = new Date(dateString);
-    return new Intl.DateTimeFormat('en-US', {
+    return new Intl.DateTimeFormat('en-IN', {
       month: 'short',
       day: 'numeric'
     }).format(date);
@@ -114,7 +114,7 @@ const BillReminders: React.FC = () => {
                       {bill.title}
                     </p>
                     <span className={`font-medium ${bill.status === 'Paid' ? 'text-muted-foreground' : ''}`}>
-                      ${bill.amount.toFixed(2)}
+                      ₹{bill.amount.toFixed(2)}
                     </span>
                   </div>
                   <div className="flex justify-between items-center">
