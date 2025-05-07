@@ -15,12 +15,17 @@ interface BudgetCategory {
 const BudgetCategories: React.FC = () => {
   // Sample budget categories data
   const categories: BudgetCategory[] = [
-    { name: 'Housing', spent: 1200, budget: 1500, color: '#0EA5E9' },
-    { name: 'Food', spent: 680, budget: 650, color: '#F97316' },
-    { name: 'Transportation', spent: 320, budget: 400, color: '#8B5CF6' },
-    { name: 'Entertainment', spent: 450, budget: 400, color: '#D946EF' },
-    { name: 'Utilities', spent: 280, budget: 300, color: '#10B981' },
+    { name: 'Housing', spent: 120000, budget: 150000, color: '#0EA5E9' },
+    { name: 'Food', spent: 68000, budget: 65000, color: '#F97316' },
+    { name: 'Transportation', spent: 32000, budget: 40000, color: '#8B5CF6' },
+    { name: 'Entertainment', spent: 45000, budget: 40000, color: '#D946EF' },
+    { name: 'Utilities', spent: 28000, budget: 30000, color: '#10B981' },
   ];
+
+  // Format Indian Rupees
+  const formatIndianRupees = (amount: number): string => {
+    return `₹${amount.toLocaleString('en-IN')}`;
+  };
 
   return (
     <Card>
@@ -54,8 +59,8 @@ const BudgetCategories: React.FC = () => {
                   />
                 </div>
                 <div className="flex justify-between text-xs text-muted-foreground">
-                  <span>${category.spent}</span>
-                  <span>${category.budget}</span>
+                  <span>{formatIndianRupees(category.spent)}</span>
+                  <span>{formatIndianRupees(category.budget)}</span>
                 </div>
               </div>
             );

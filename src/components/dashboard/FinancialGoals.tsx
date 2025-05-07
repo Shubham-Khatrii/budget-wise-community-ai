@@ -21,8 +21,8 @@ const FinancialGoals: React.FC = () => {
     {
       id: 'g1',
       title: 'Emergency Fund',
-      targetAmount: 10000,
-      currentAmount: 7500,
+      targetAmount: 1000000,
+      currentAmount: 750000,
       dueDate: '2025-12-31',
       icon: <PiggyBank className="h-4 w-4" />,
       iconBg: 'bg-budget-blue/10 text-budget-blue',
@@ -30,9 +30,9 @@ const FinancialGoals: React.FC = () => {
     },
     {
       id: 'g2',
-      title: 'European Vacation',
-      targetAmount: 5000,
-      currentAmount: 2750,
+      title: 'Goa Vacation',
+      targetAmount: 200000,
+      currentAmount: 75000,
       dueDate: '2026-06-15',
       icon: <Plane className="h-4 w-4" />,
       iconBg: 'bg-budget-purple/10 text-budget-purple',
@@ -41,8 +41,8 @@ const FinancialGoals: React.FC = () => {
     {
       id: 'g3',
       title: 'New Car',
-      targetAmount: 20000,
-      currentAmount: 5000,
+      targetAmount: 1500000,
+      currentAmount: 500000,
       dueDate: '2027-03-01',
       icon: <Car className="h-4 w-4" />,
       iconBg: 'bg-budget-green/10 text-budget-green',
@@ -50,9 +50,9 @@ const FinancialGoals: React.FC = () => {
     },
     {
       id: 'g4',
-      title: 'Down Payment',
-      targetAmount: 50000,
-      currentAmount: 12000,
+      title: 'Home Down Payment',
+      targetAmount: 5000000,
+      currentAmount: 1200000,
       dueDate: '2028-01-01',
       icon: <Home className="h-4 w-4" />,
       iconBg: 'bg-budget-orange/10 text-budget-orange',
@@ -68,7 +68,7 @@ const FinancialGoals: React.FC = () => {
   // Format date to a more readable format
   const formatDate = (dateString: string): string => {
     const date = new Date(dateString);
-    return new Intl.DateTimeFormat('en-US', {
+    return new Intl.DateTimeFormat('en-IN', {
       year: 'numeric',
       month: 'short',
     }).format(date);
@@ -114,7 +114,7 @@ const FinancialGoals: React.FC = () => {
                         </Badge>
                       </div>
                       <p className="text-xs text-muted-foreground">
-                        Target: ${goal.targetAmount.toLocaleString()} • Due: {formatDate(goal.dueDate)}
+                        Target: ₹{goal.targetAmount.toLocaleString('en-IN')} • Due: {formatDate(goal.dueDate)}
                       </p>
                     </div>
                   </div>
@@ -124,8 +124,8 @@ const FinancialGoals: React.FC = () => {
                 <div className="space-y-1">
                   <Progress value={progress} className="h-2" />
                   <div className="flex justify-between text-xs text-muted-foreground">
-                    <span>${goal.currentAmount.toLocaleString()} saved</span>
-                    <span>${(goal.targetAmount - goal.currentAmount).toLocaleString()} to go</span>
+                    <span>₹{goal.currentAmount.toLocaleString('en-IN')} saved</span>
+                    <span>₹{(goal.targetAmount - goal.currentAmount).toLocaleString('en-IN')} to go</span>
                   </div>
                 </div>
               </div>

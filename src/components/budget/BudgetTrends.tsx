@@ -6,12 +6,12 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 const BudgetTrends: React.FC = () => {
   // Sample budget trend data for the past 6 months
   const trendData = [
-    { month: 'Nov', budget: 3000, spent: 2850 },
-    { month: 'Dec', budget: 3100, spent: 3200 },
-    { month: 'Jan', budget: 3100, spent: 2900 },
-    { month: 'Feb', budget: 3150, spent: 3000 },
-    { month: 'Mar', budget: 3200, spent: 2800 },
-    { month: 'Apr', budget: 3250, spent: 2930 },
+    { month: 'Nov', budget: 300000, spent: 285000 },
+    { month: 'Dec', budget: 310000, spent: 320000 },
+    { month: 'Jan', budget: 310000, spent: 290000 },
+    { month: 'Feb', budget: 315000, spent: 300000 },
+    { month: 'Mar', budget: 320000, spent: 280000 },
+    { month: 'Apr', budget: 325000, spent: 293000 },
   ];
 
   return (
@@ -28,10 +28,10 @@ const BudgetTrends: React.FC = () => {
               <XAxis dataKey="month" />
               <YAxis 
                 width={45}
-                tickFormatter={(value) => `$${value}`}
+                tickFormatter={(value) => `₹${(value/1000)}K`}
               />
               <Tooltip 
-                formatter={(value: number) => [`$${value}`, '']}
+                formatter={(value: number) => [`₹${value.toLocaleString('en-IN')}`, '']}
                 labelFormatter={(label) => `Month: ${label}`}
               />
               <Line 

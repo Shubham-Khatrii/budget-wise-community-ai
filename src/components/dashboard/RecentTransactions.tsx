@@ -27,7 +27,7 @@ const RecentTransactions: React.FC = () => {
     {
       id: 't1',
       title: 'Grocery Shopping',
-      amount: -84.32,
+      amount: -8432,
       date: '2025-04-28',
       category: 'Food',
       icon: <ShoppingBag className="h-4 w-4" />,
@@ -36,7 +36,7 @@ const RecentTransactions: React.FC = () => {
     {
       id: 't2',
       title: 'Monthly Rent',
-      amount: -1200,
+      amount: -120000,
       date: '2025-04-25',
       category: 'Housing',
       icon: <Home className="h-4 w-4" />,
@@ -44,8 +44,8 @@ const RecentTransactions: React.FC = () => {
     },
     {
       id: 't3',
-      title: 'Starbucks Coffee',
-      amount: -5.80,
+      title: 'Chai Coffee',
+      amount: -580,
       date: '2025-04-28',
       category: 'Food',
       icon: <Coffee className="h-4 w-4" />,
@@ -53,8 +53,8 @@ const RecentTransactions: React.FC = () => {
     },
     {
       id: 't4',
-      title: 'Uber to Work',
-      amount: -12.50,
+      title: 'Auto to Work',
+      amount: -1250,
       date: '2025-04-28',
       category: 'Transportation',
       icon: <Bus className="h-4 w-4" />,
@@ -63,7 +63,7 @@ const RecentTransactions: React.FC = () => {
     {
       id: 't5',
       title: 'Dinner with Friends',
-      amount: -38.25,
+      amount: -3825,
       date: '2025-04-27',
       category: 'Food',
       icon: <Utensils className="h-4 w-4" />,
@@ -72,7 +72,7 @@ const RecentTransactions: React.FC = () => {
     {
       id: 't6',
       title: 'Movie Tickets',
-      amount: -24.00,
+      amount: -2400,
       date: '2025-04-26',
       category: 'Entertainment',
       icon: <Film className="h-4 w-4" />,
@@ -81,7 +81,7 @@ const RecentTransactions: React.FC = () => {
     {
       id: 't7',
       title: 'Internet Bill',
-      amount: -65.00,
+      amount: -1999,
       date: '2025-04-25',
       category: 'Utilities',
       icon: <Wifi className="h-4 w-4" />,
@@ -90,7 +90,7 @@ const RecentTransactions: React.FC = () => {
     {
       id: 't8',
       title: 'Gym Membership',
-      amount: -49.99,
+      amount: -2499,
       date: '2025-04-24',
       category: 'Health',
       icon: <Dumbbell className="h-4 w-4" />,
@@ -101,16 +101,16 @@ const RecentTransactions: React.FC = () => {
   // Format date to a more readable format
   const formatDate = (dateString: string): string => {
     const date = new Date(dateString);
-    return new Intl.DateTimeFormat('en-US', {
+    return new Intl.DateTimeFormat('en-IN', {
       month: 'short',
       day: 'numeric'
     }).format(date);
   };
 
-  // Format amount with appropriate sign and decimals
+  // Format amount with appropriate sign and decimals for Indian Rupees
   const formatAmount = (amount: number): string => {
     const sign = amount < 0 ? '-' : '+';
-    return `${sign}$${Math.abs(amount).toFixed(2)}`;
+    return `${sign}₹${Math.abs(amount).toLocaleString('en-IN')}`;
   };
 
   return (

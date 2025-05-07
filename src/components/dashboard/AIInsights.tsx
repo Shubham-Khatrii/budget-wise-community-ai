@@ -22,18 +22,18 @@ const AIInsights: React.FC = () => {
     },
     {
       id: 'i2',
-      text: "Congratulations! You've reached 50% of your emergency fund goal.",
+      text: "Congratulations! You've reached 50% of your emergency fund goal of ₹10 lakhs.",
       type: 'positive',
     },
     {
       id: 'i3',
-      text: 'Based on your income, you could increase your monthly savings by $250 without impacting your lifestyle.',
+      text: 'Based on your income, you could increase your monthly savings by ₹25,000 without impacting your lifestyle.',
       type: 'tip',
       action: 'Adjust savings',
     },
     {
       id: 'i4',
-      text: 'Your subscription services total $95/month. We found potential savings of $35 from overlapping services.',
+      text: 'Your subscription services total ₹9,500/month. We found potential savings of ₹3,500 from overlapping services.',
       type: 'warning',
       action: 'View details',
     },

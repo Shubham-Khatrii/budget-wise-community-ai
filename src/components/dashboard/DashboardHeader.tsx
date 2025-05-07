@@ -1,8 +1,7 @@
 
 import React from 'react';
-import { Card } from '@/components/ui/card';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { 
   DropdownMenu, 
   DropdownMenuContent, 
@@ -18,7 +17,7 @@ const DashboardHeader: React.FC = () => {
     <div className="flex flex-col space-y-4 md:flex-row md:items-center md:justify-between md:space-y-0 mb-8">
       <div>
         <h1 className="text-2xl md:text-3xl font-bold">Dashboard</h1>
-        <p className="text-muted-foreground">Welcome back, Alex! Here's your financial overview.</p>
+        <p className="text-muted-foreground">Welcome back, Rahul! Here's your financial overview.</p>
       </div>
       <div className="flex items-center space-x-3">
         <Button size="sm" className="flex items-center gap-1">
@@ -29,7 +28,7 @@ const DashboardHeader: React.FC = () => {
           <DropdownMenuTrigger asChild>
             <Avatar className="h-9 w-9 cursor-pointer">
               <AvatarImage src="https://github.com/shadcn.png" />
-              <AvatarFallback>AJ</AvatarFallback>
+              <AvatarFallback>RJ</AvatarFallback>
             </Avatar>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">

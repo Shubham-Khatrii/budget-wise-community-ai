@@ -7,11 +7,11 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 const BudgetOverview: React.FC = () => {
   // Sample budget data
   const budgetCategories = [
-    { name: 'Housing', spent: 1200, budget: 1500, color: '#0EA5E9' },
-    { name: 'Food', spent: 680, budget: 650, color: '#F97316' },
-    { name: 'Transportation', spent: 320, budget: 400, color: '#8B5CF6' },
-    { name: 'Entertainment', spent: 450, budget: 400, color: '#D946EF' },
-    { name: 'Utilities', spent: 280, budget: 300, color: '#10B981' },
+    { name: 'Housing', spent: 120000, budget: 150000, color: '#0EA5E9' },
+    { name: 'Food', spent: 68000, budget: 65000, color: '#F97316' },
+    { name: 'Transportation', spent: 32000, budget: 40000, color: '#8B5CF6' },
+    { name: 'Entertainment', spent: 45000, budget: 40000, color: '#D946EF' },
+    { name: 'Utilities', spent: 28000, budget: 30000, color: '#10B981' },
   ];
 
   // Calculate total budget and spent
@@ -25,6 +25,11 @@ const BudgetOverview: React.FC = () => {
     value: cat.spent,
     color: cat.color,
   }));
+
+  // Function to format currency in Indian Rupees
+  const formatIndianRupees = (amount: number): string => {
+    return `₹${amount.toLocaleString('en-IN')}`;
+  };
 
   return (
     <div className="grid gap-6 grid-cols-1 lg:grid-cols-2 mb-6">
@@ -41,8 +46,8 @@ const BudgetOverview: React.FC = () => {
             </div>
             <Progress value={totalPercentage} className="h-2" />
             <div className="flex justify-between mt-1 text-xs text-muted-foreground">
-              <span>${totalSpent} spent</span>
-              <span>${totalBudget} budgeted</span>
+              <span>{formatIndianRupees(totalSpent)} spent</span>
+              <span>{formatIndianRupees(totalBudget)} budgeted</span>
             </div>
           </div>
 
@@ -71,8 +76,8 @@ const BudgetOverview: React.FC = () => {
                     />
                   </div>
                   <div className="flex justify-between text-xs text-muted-foreground">
-                    <span>${category.spent}</span>
-                    <span>${category.budget}</span>
+                    <span>{formatIndianRupees(category.spent)}</span>
+                    <span>{formatIndianRupees(category.budget)}</span>
                   </div>
                 </div>
               );
@@ -104,7 +109,7 @@ const BudgetOverview: React.FC = () => {
                   ))}
                 </Pie>
                 <Tooltip 
-                  formatter={(value: number) => [`$${value}`, 'Spent']}
+                  formatter={(value: number) => [`₹${value.toLocaleString('en-IN')}`, 'Spent']}
                   labelFormatter={(name) => `${name}`}
                 />
               </PieChart>

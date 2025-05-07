@@ -1,14 +1,14 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowUpRight, ArrowDownRight, DollarSign } from 'lucide-react';
+import { ArrowUpRight, ArrowDownRight, IndianRupee } from 'lucide-react';
 
 const FinancesSummary: React.FC = () => {
   const summaryItems = [
     {
       title: 'Total Balance',
-      value: '$12,580.00',
-      icon: <DollarSign className="h-4 w-4" />,
+      value: '₹12,58,000',
+      icon: <IndianRupee className="h-4 w-4" />,
       trend: '',
       trendValue: '',
       color: 'text-budget-blue',
@@ -16,7 +16,7 @@ const FinancesSummary: React.FC = () => {
     },
     {
       title: 'Monthly Income',
-      value: '$8,350.00',
+      value: '₹8,35,000',
       icon: <ArrowUpRight className="h-4 w-4" />,
       trend: 'up',
       trendValue: '4.3%',
@@ -25,7 +25,7 @@ const FinancesSummary: React.FC = () => {
     },
     {
       title: 'Monthly Expenses',
-      value: '$3,628.00',
+      value: '₹3,62,800',
       icon: <ArrowDownRight className="h-4 w-4" />,
       trend: 'down',
       trendValue: '2.1%',
