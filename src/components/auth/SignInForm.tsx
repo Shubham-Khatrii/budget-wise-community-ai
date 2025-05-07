@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -18,6 +18,8 @@ const signInSchema = z.object({
 type SignInValues = z.infer<typeof signInSchema>;
 
 const SignInForm: React.FC = () => {
+  const navigate = useNavigate();
+  
   const { 
     register, 
     handleSubmit, 
@@ -35,7 +37,8 @@ const SignInForm: React.FC = () => {
       await new Promise((resolve) => setTimeout(resolve, 1000));
       
       toast.success('Signed in successfully!');
-      // Would redirect to dashboard here
+      // Redirect to dashboard after successful sign in
+      navigate('/dashboard');
     } catch (error) {
       toast.error('Failed to sign in. Please check your credentials.');
       console.error(error);
