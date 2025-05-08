@@ -8,91 +8,27 @@ import { Badge } from '@/components/ui/badge';
 import { PlusCircle, PiggyBank, Plane, Car, Home, Gift, GraduationCap, BadgeIndianRupee, MoreHorizontal } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-
-interface Goal {
-  id: string;
-  title: string;
-  targetAmount: number;
-  currentAmount: number;
-  dueDate: string;
-  icon: React.ReactNode;
-  iconBg: string;
-  priority: 'High' | 'Medium' | 'Low';
-  category: 'Short-term' | 'Long-term';
-}
+import { useAppContext } from '@/contexts/AppContext';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { toast } from 'sonner';
 
 const Goals: React.FC = () => {
+  const { goals, addContributionToGoal, formatCurrency } = useAppContext();
   const [activeTab, setActiveTab] = useState<string>("all");
+  const [monthlyContribution, setMonthlyContribution] = useState(75000);
+  const [isContributeDialogOpen, setIsContributeDialogOpen] = useState(false);
+  const [selectedGoalId, setSelectedGoalId] = useState<string | null>(null);
+  const [contributionAmount, setContributionAmount] = useState('');
   
-  const goals: Goal[] = [
-    {
-      id: 'g1',
-      title: 'Emergency Fund',
-      targetAmount: 1000000,
-      currentAmount: 750000,
-      dueDate: '2025-12-31',
-      icon: <PiggyBank className="h-4 w-4" />,
-      iconBg: 'bg-budget-blue/10 text-budget-blue',
-      priority: 'High',
-      category: 'Short-term',
-    },
-    {
-      id: 'g2',
-      title: 'Goa Vacation',
-      targetAmount: 200000,
-      currentAmount: 75000,
-      dueDate: '2026-06-15',
-      icon: <Plane className="h-4 w-4" />,
-      iconBg: 'bg-budget-purple/10 text-budget-purple',
-      priority: 'Medium',
-      category: 'Short-term',
-    },
-    {
-      id: 'g3',
-      title: 'New Car',
-      targetAmount: 1500000,
-      currentAmount: 500000,
-      dueDate: '2027-03-01',
-      icon: <Car className="h-4 w-4" />,
-      iconBg: 'bg-budget-green/10 text-budget-green',
-      priority: 'Medium',
-      category: 'Long-term',
-    },
-    {
-      id: 'g4',
-      title: 'Home Down Payment',
-      targetAmount: 5000000,
-      currentAmount: 1200000,
-      dueDate: '2028-01-01',
-      icon: <Home className="h-4 w-4" />,
-      iconBg: 'bg-budget-orange/10 text-budget-orange',
-      priority: 'High',
-      category: 'Long-term',
-    },
-    {
-      id: 'g5',
-      title: 'Anniversary Gift',
-      targetAmount: 50000,
-      currentAmount: 30000,
-      dueDate: '2025-08-15',
-      icon: <Gift className="h-4 w-4" />,
-      iconBg: 'bg-budget-pink/10 text-budget-pink',
-      priority: 'Medium',
-      category: 'Short-term',
-    },
-    {
-      id: 'g6',
-      title: 'Higher Education',
-      targetAmount: 2500000,
-      currentAmount: 400000,
-      dueDate: '2029-06-01',
-      icon: <GraduationCap className="h-4 w-4" />,
-      iconBg: 'bg-budget-blue/10 text-budget-blue',
-      priority: 'Low',
-      category: 'Long-term',
-    },
-  ];
-
   // Calculate progress percentage
   const calculateProgress = (current: number, target: number): number => {
     return Math.round((current / target) * 100);
@@ -127,6 +63,54 @@ const Goals: React.FC = () => {
     }
   };
 
+  // Calculate total saved and target amounts
+  const totalSaved = goals.reduce((sum, goal) => sum + goal.currentAmount, 0);
+  const totalTarget = goals.reduce((sum, goal) => sum + goal.targetAmount, 0);
+  const totalProgress = totalTarget > 0 ? Math.round((totalSaved / totalTarget) * 100) : 0;
+
+  // Handle monthly contribution change
+  const handleContributionChange = (action: 'increase' | 'decrease' | 'optimize') => {
+    if (action === 'increase') {
+      setMonthlyContribution(prev => prev + 5000);
+      toast.success(`Monthly contribution increased to ${formatCurrency(monthlyContribution + 5000)}`);
+    } else if (action === 'decrease') {
+      const newValue = Math.max(5000, monthlyContribution - 5000);
+      setMonthlyContribution(newValue);
+      toast.success(`Monthly contribution decreased to ${formatCurrency(newValue)}`);
+    } else if (action === 'optimize') {
+      // Simple optimization logic - 10% of total remaining target
+      const totalRemaining = totalTarget - totalSaved;
+      const optimizedContribution = Math.round(totalRemaining * 0.1 / 12) * 1000; // Rounded to nearest thousand
+      setMonthlyContribution(optimizedContribution);
+      toast.success(`Monthly contribution optimized to ${formatCurrency(optimizedContribution)}`);
+    }
+  };
+
+  // Open contribute dialog
+  const openContributeDialog = (goalId: string) => {
+    setSelectedGoalId(goalId);
+    setIsContributeDialogOpen(true);
+  };
+
+  // Handle contribution
+  const handleContribute = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!contributionAmount || !selectedGoalId) {
+      return;
+    }
+    
+    const amount = parseFloat(contributionAmount);
+    if (isNaN(amount) || amount <= 0) {
+      return;
+    }
+    
+    addContributionToGoal(selectedGoalId, amount);
+    
+    setContributionAmount('');
+    setIsContributeDialogOpen(false);
+  };
+
   return (
     <AppLayout>
       <div className="animate-fade-in">
@@ -150,12 +134,12 @@ const Goals: React.FC = () => {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold mb-1">₹{(2955000).toLocaleString('en-IN')}</div>
+              <div className="text-3xl font-bold mb-1">{formatCurrency(totalSaved)}</div>
               <p className="text-sm text-muted-foreground mb-4">Total saved across all goals</p>
-              <Progress value={29} className="h-2 mb-1" />
+              <Progress value={totalProgress} className="h-2 mb-1" />
               <div className="flex justify-between text-xs text-muted-foreground">
-                <span>₹{(2955000).toLocaleString('en-IN')} saved</span>
-                <span>₹{(10250000).toLocaleString('en-IN')} target</span>
+                <span>{formatCurrency(totalSaved)} saved</span>
+                <span>{formatCurrency(totalTarget)} target</span>
               </div>
             </CardContent>
           </Card>
@@ -189,12 +173,30 @@ const Goals: React.FC = () => {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold mb-1">₹{(75000).toLocaleString('en-IN')}</div>
+              <div className="text-3xl font-bold mb-1">{formatCurrency(monthlyContribution)}</div>
               <p className="text-sm text-muted-foreground mb-4">Current monthly savings target</p>
               <div className="grid grid-cols-3 gap-2">
-                <Button size="sm" variant="outline">Decrease</Button>
-                <Button size="sm" variant="outline">Optimize</Button>
-                <Button size="sm" variant="outline">Increase</Button>
+                <Button 
+                  size="sm" 
+                  variant="outline"
+                  onClick={() => handleContributionChange('decrease')}
+                >
+                  Decrease
+                </Button>
+                <Button 
+                  size="sm" 
+                  variant="outline"
+                  onClick={() => handleContributionChange('optimize')}
+                >
+                  Optimize
+                </Button>
+                <Button 
+                  size="sm" 
+                  variant="outline"
+                  onClick={() => handleContributionChange('increase')}
+                >
+                  Increase
+                </Button>
               </div>
             </CardContent>
           </Card>
@@ -236,7 +238,7 @@ const Goals: React.FC = () => {
                             </Badge>
                           </div>
                           <p className="text-xs text-muted-foreground">
-                            Target: ₹{goal.targetAmount.toLocaleString('en-IN')} • Due: {formatDate(goal.dueDate)}
+                            Target: {formatCurrency(goal.targetAmount)} • Due: {formatDate(goal.dueDate)}
                           </p>
                         </div>
                       </div>
@@ -250,7 +252,9 @@ const Goals: React.FC = () => {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuItem>Add money</DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => openContributeDialog(goal.id)}>
+                              Add money
+                            </DropdownMenuItem>
                             <DropdownMenuItem>Edit goal</DropdownMenuItem>
                             <DropdownMenuItem className="text-destructive">Delete goal</DropdownMenuItem>
                           </DropdownMenuContent>
@@ -261,8 +265,8 @@ const Goals: React.FC = () => {
                     <div className="space-y-1">
                       <Progress value={progress} className="h-2" />
                       <div className="flex justify-between text-xs text-muted-foreground">
-                        <span>₹{goal.currentAmount.toLocaleString('en-IN')} saved</span>
-                        <span>₹{(goal.targetAmount - goal.currentAmount).toLocaleString('en-IN')} to go</span>
+                        <span>{formatCurrency(goal.currentAmount)} saved</span>
+                        <span>{formatCurrency(goal.targetAmount - goal.currentAmount)} to go</span>
                       </div>
                     </div>
                   </div>
@@ -278,6 +282,41 @@ const Goals: React.FC = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Contribute Dialog */}
+      <Dialog open={isContributeDialogOpen} onOpenChange={setIsContributeDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Add Contribution</DialogTitle>
+            <DialogDescription>
+              Add funds to your savings goal.
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleContribute}>
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="contribution" className="text-right">
+                  Amount (₹)
+                </Label>
+                <Input
+                  id="contribution"
+                  type="number"
+                  value={contributionAmount}
+                  onChange={(e) => setContributionAmount(e.target.value)}
+                  className="col-span-3"
+                  placeholder="10000"
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" type="button" onClick={() => setIsContributeDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button type="submit">Add Funds</Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </AppLayout>
   );
 };

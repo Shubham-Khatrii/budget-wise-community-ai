@@ -35,6 +35,18 @@ const BillReminders: React.FC = () => {
     return 'bg-muted text-muted-foreground';
   };
 
+  // Filter to show only pending and recent paid bills
+  const recentBills = bills
+    .filter(bill => bill.status === 'Pending' || bill.status === 'Paid')
+    .sort((a, b) => {
+      // Sort by status first (pending first), then by due date
+      if (a.status !== b.status) {
+        return a.status === 'Pending' ? -1 : 1;
+      }
+      return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
+    })
+    .slice(0, 5); // Show only the first 5 bills
+
   return (
     <Card className="col-span-full lg:col-span-1">
       <CardHeader>
@@ -43,7 +55,7 @@ const BillReminders: React.FC = () => {
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          {bills.map((bill) => {
+          {recentBills.map((bill) => {
             const daysUntil = getDaysUntil(bill.dueDate);
             let statusText = bill.status;
             
@@ -97,6 +109,12 @@ const BillReminders: React.FC = () => {
               </div>
             );
           })}
+
+          {recentBills.length === 0 && (
+            <div className="text-center py-6 text-muted-foreground">
+              No upcoming bills
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>

@@ -443,7 +443,8 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       addExpense({
         title: `Paid: ${bill.title}`,
         amount: bill.amount,
-        category: 'Utilities'
+        category: 'Utilities',
+        description: `Payment for ${bill.title}`
       });
       
       toast.success(`${bill.title} marked as paid`);

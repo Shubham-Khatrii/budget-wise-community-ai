@@ -15,103 +15,26 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-
-interface Bill {
-  id: string;
-  name: string;
-  amount: number;
-  dueDate: string;
-  category: string;
-  status: 'paid' | 'pending' | 'overdue';
-  recurring: boolean;
-  frequency?: string;
-}
+import { useAppContext } from '@/contexts/AppContext';
 
 const Bills: React.FC = () => {
+  const { bills, markBillAsPaid, formatCurrency } = useAppContext();
   const [activeTab, setActiveTab] = useState<string>("upcoming");
   
-  const bills: Bill[] = [
-    {
-      id: 'b1',
-      name: 'Electricity Bill',
-      amount: 3250,
-      dueDate: '2025-05-15',
-      category: 'Utilities',
-      status: 'pending',
-      recurring: true,
-      frequency: 'Monthly',
-    },
-    {
-      id: 'b2',
-      name: 'Internet Service',
-      amount: 1999,
-      dueDate: '2025-05-20',
-      category: 'Utilities',
-      status: 'pending',
-      recurring: true,
-      frequency: 'Monthly',
-    },
-    {
-      id: 'b3',
-      name: 'Rent Payment',
-      amount: 25000,
-      dueDate: '2025-05-05',
-      category: 'Housing',
-      status: 'paid',
-      recurring: true,
-      frequency: 'Monthly',
-    },
-    {
-      id: 'b4',
-      name: 'Netflix Subscription',
-      amount: 649,
-      dueDate: '2025-05-12',
-      category: 'Entertainment',
-      status: 'pending',
-      recurring: true,
-      frequency: 'Monthly',
-    },
-    {
-      id: 'b5',
-      name: 'Mobile Recharge',
-      amount: 499,
-      dueDate: '2025-04-30',
-      category: 'Utilities',
-      status: 'overdue',
-      recurring: true,
-      frequency: 'Monthly',
-    },
-    {
-      id: 'b6',
-      name: 'Credit Card Payment',
-      amount: 15780,
-      dueDate: '2025-05-18',
-      category: 'Financial',
-      status: 'pending',
-      recurring: true,
-      frequency: 'Monthly',
-    },
-    {
-      id: 'b7',
-      name: 'Health Insurance',
-      amount: 8500,
-      dueDate: '2025-08-10',
-      category: 'Insurance',
-      status: 'pending',
-      recurring: true,
-      frequency: 'Quarterly',
-    },
-    {
-      id: 'b8',
-      name: 'Amazon Prime',
-      amount: 1499,
-      dueDate: '2025-06-15',
-      category: 'Entertainment',
-      status: 'pending',
-      recurring: true,
-      frequency: 'Annual',
-    },
-  ];
+  // Calculate total amount for upcoming/pending bills
+  const upcomingBillsTotal = bills
+    .filter(bill => bill.status === 'Pending')
+    .reduce((sum, bill) => sum + bill.amount, 0);
+
+  // Calculate total amount for overdue bills
+  const overdueBillsTotal = bills
+    .filter(bill => bill.status === 'Overdue')
+    .reduce((sum, bill) => sum + bill.amount, 0);
+
+  // Calculate total amount for paid bills
+  const paidBillsTotal = bills
+    .filter(bill => bill.status === 'Paid')
+    .reduce((sum, bill) => sum + bill.amount, 0);
 
   // Format date to a more readable format
   const formatDate = (dateString: string): string => {
@@ -123,43 +46,38 @@ const Bills: React.FC = () => {
     }).format(date);
   };
 
-  // Calculate total amount for upcoming/pending bills
-  const upcomingBillsTotal = bills
-    .filter(bill => bill.status === 'pending')
-    .reduce((sum, bill) => sum + bill.amount, 0);
-
-  // Calculate total amount for overdue bills
-  const overdueBillsTotal = bills
-    .filter(bill => bill.status === 'overdue')
-    .reduce((sum, bill) => sum + bill.amount, 0);
-
-  // Calculate total amount for paid bills
-  const paidBillsTotal = bills
-    .filter(bill => bill.status === 'paid')
-    .reduce((sum, bill) => sum + bill.amount, 0);
-
   // Filter bills based on active tab
   const filteredBills = bills.filter(bill => {
     if (activeTab === "all") return true;
-    if (activeTab === "upcoming") return bill.status === 'pending';
-    if (activeTab === "overdue") return bill.status === 'overdue';
-    if (activeTab === "paid") return bill.status === 'paid';
+    if (activeTab === "upcoming") return bill.status === 'Pending';
+    if (activeTab === "overdue") return bill.status === 'Overdue';
+    if (activeTab === "paid") return bill.status === 'Paid';
     return false;
   });
 
   // Get status badge styling
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'paid':
+      case 'Paid':
         return <Badge className="bg-budget-green">Paid</Badge>;
-      case 'pending':
+      case 'Pending':
         return <Badge variant="outline" className="text-budget-orange">Pending</Badge>;
-      case 'overdue':
+      case 'Overdue':
         return <Badge className="bg-destructive">Overdue</Badge>;
       default:
         return null;
     }
   };
+
+  // Handle mark as paid button
+  const handleMarkAsPaid = (billId: string) => {
+    markBillAsPaid(billId);
+  };
+
+  // Count pending bills
+  const pendingBillsCount = bills.filter(bill => bill.status === 'Pending').length;
+  const overdueBillsCount = bills.filter(bill => bill.status === 'Overdue').length;
+  const paidBillsCount = bills.filter(bill => bill.status === 'Paid').length;
 
   return (
     <AppLayout>
@@ -184,8 +102,8 @@ const Bills: React.FC = () => {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold mb-1">₹{upcomingBillsTotal.toLocaleString('en-IN')}</div>
-              <p className="text-sm text-muted-foreground mb-2">5 bills pending</p>
+              <div className="text-3xl font-bold mb-1">{formatCurrency(upcomingBillsTotal)}</div>
+              <p className="text-sm text-muted-foreground mb-2">{pendingBillsCount} bills pending</p>
               <Progress value={60} className="h-2" />
             </CardContent>
           </Card>
@@ -198,8 +116,8 @@ const Bills: React.FC = () => {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold mb-1">₹{overdueBillsTotal.toLocaleString('en-IN')}</div>
-              <p className="text-sm text-destructive mb-2">1 bill overdue</p>
+              <div className="text-3xl font-bold mb-1">{formatCurrency(overdueBillsTotal)}</div>
+              <p className="text-sm text-destructive mb-2">{overdueBillsCount} bills overdue</p>
               <Button size="sm" variant="outline" className="w-full">Pay Now</Button>
             </CardContent>
           </Card>
@@ -212,9 +130,9 @@ const Bills: React.FC = () => {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold mb-1">₹{paidBillsTotal.toLocaleString('en-IN')}</div>
-              <p className="text-sm text-muted-foreground mb-2">1 bill paid</p>
-              <Progress value={15} className="h-2" />
+              <div className="text-3xl font-bold mb-1">{formatCurrency(paidBillsTotal)}</div>
+              <p className="text-sm text-muted-foreground mb-2">{paidBillsCount} bills paid</p>
+              <Progress value={paidBillsTotal > 0 ? 100 : 0} className="h-2" />
             </CardContent>
           </Card>
         </div>
@@ -253,7 +171,7 @@ const Bills: React.FC = () => {
                       <TableRow key={bill.id}>
                         <TableCell className="font-medium">
                           <div className="flex flex-col">
-                            {bill.name}
+                            {bill.title}
                             {bill.recurring && (
                               <span className="text-xs text-muted-foreground">
                                 Recurring ({bill.frequency})
@@ -262,12 +180,16 @@ const Bills: React.FC = () => {
                           </div>
                         </TableCell>
                         <TableCell>{bill.category}</TableCell>
-                        <TableCell>₹{bill.amount.toLocaleString('en-IN')}</TableCell>
+                        <TableCell>{formatCurrency(bill.amount)}</TableCell>
                         <TableCell>{formatDate(bill.dueDate)}</TableCell>
                         <TableCell>{getStatusBadge(bill.status)}</TableCell>
                         <TableCell className="text-right">
-                          <Button size="sm" variant="outline">
-                            {bill.status === 'pending' || bill.status === 'overdue' ? 'Mark Paid' : 'Details'}
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            onClick={() => bill.status !== 'Paid' ? handleMarkAsPaid(bill.id) : null}
+                          >
+                            {bill.status === 'Pending' || bill.status === 'Overdue' ? 'Mark Paid' : 'Details'}
                           </Button>
                         </TableCell>
                       </TableRow>
