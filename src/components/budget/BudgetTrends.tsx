@@ -2,8 +2,11 @@
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { useAppContext } from '@/contexts/AppContext';
 
 const BudgetTrends: React.FC = () => {
+  const { formatCurrency } = useAppContext();
+  
   // Sample budget trend data for the past 6 months
   const trendData = [
     { month: 'Nov', budget: 300000, spent: 285000 },
@@ -31,7 +34,7 @@ const BudgetTrends: React.FC = () => {
                 tickFormatter={(value) => `₹${(value/1000)}K`}
               />
               <Tooltip 
-                formatter={(value: number) => [`₹${value.toLocaleString('en-IN')}`, '']}
+                formatter={(value: number) => [formatCurrency(value), '']}
                 labelFormatter={(label) => `Month: ${label}`}
               />
               <Line 

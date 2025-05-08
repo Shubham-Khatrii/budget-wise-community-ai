@@ -1,9 +1,9 @@
 
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
 import { ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useAppContext } from '@/contexts/AppContext';
 
 interface BudgetCategory {
   name: string;
@@ -13,6 +13,8 @@ interface BudgetCategory {
 }
 
 const BudgetCategories: React.FC = () => {
+  const { formatCurrency } = useAppContext();
+  
   // Sample budget categories data
   const categories: BudgetCategory[] = [
     { name: 'Housing', spent: 120000, budget: 150000, color: '#0EA5E9' },
@@ -21,11 +23,6 @@ const BudgetCategories: React.FC = () => {
     { name: 'Entertainment', spent: 45000, budget: 40000, color: '#D946EF' },
     { name: 'Utilities', spent: 28000, budget: 30000, color: '#10B981' },
   ];
-
-  // Format Indian Rupees
-  const formatIndianRupees = (amount: number): string => {
-    return `₹${amount.toLocaleString('en-IN')}`;
-  };
 
   return (
     <Card>
@@ -59,8 +56,8 @@ const BudgetCategories: React.FC = () => {
                   />
                 </div>
                 <div className="flex justify-between text-xs text-muted-foreground">
-                  <span>{formatIndianRupees(category.spent)}</span>
-                  <span>{formatIndianRupees(category.budget)}</span>
+                  <span>{formatCurrency(category.spent)}</span>
+                  <span>{formatCurrency(category.budget)}</span>
                 </div>
               </div>
             );

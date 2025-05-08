@@ -2,8 +2,11 @@
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
+import { useAppContext } from '@/contexts/AppContext';
 
 const BudgetSummary: React.FC = () => {
+  const { formatCurrency } = useAppContext();
+  
   // Sample monthly budget data
   const monthlyBudget = 325000;
   const totalSpent = 293000;
@@ -25,15 +28,15 @@ const BudgetSummary: React.FC = () => {
         <div className="grid gap-6 grid-cols-1 md:grid-cols-3 mb-6">
           <div className="space-y-2">
             <p className="text-sm font-medium text-muted-foreground">Total Budget</p>
-            <p className="text-2xl font-bold">₹{monthlyBudget.toLocaleString('en-IN')}</p>
+            <p className="text-2xl font-bold">{formatCurrency(monthlyBudget)}</p>
           </div>
           <div className="space-y-2">
             <p className="text-sm font-medium text-muted-foreground">Total Spent</p>
-            <p className="text-2xl font-bold">₹{totalSpent.toLocaleString('en-IN')}</p>
+            <p className="text-2xl font-bold">{formatCurrency(totalSpent)}</p>
           </div>
           <div className="space-y-2">
             <p className="text-sm font-medium text-muted-foreground">Remaining</p>
-            <p className="text-2xl font-bold text-budget-green">₹{remaining.toLocaleString('en-IN')}</p>
+            <p className="text-2xl font-bold text-budget-green">{formatCurrency(remaining)}</p>
           </div>
         </div>
 
@@ -44,8 +47,8 @@ const BudgetSummary: React.FC = () => {
           </div>
           <Progress value={percentageSpent} className="h-2" />
           <div className="flex justify-between text-xs text-muted-foreground">
-            <span>₹{totalSpent.toLocaleString('en-IN')} spent</span>
-            <span>₹{monthlyBudget.toLocaleString('en-IN')} budgeted</span>
+            <span>{formatCurrency(totalSpent)} spent</span>
+            <span>{formatCurrency(monthlyBudget)} budgeted</span>
           </div>
         </div>
       </CardContent>

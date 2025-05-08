@@ -10,7 +10,7 @@ import {
   DropdownMenuSeparator, 
   DropdownMenuTrigger 
 } from '@/components/ui/dropdown-menu';
-import { Bell, PlusCircle } from 'lucide-react';
+import { Bell, PlusCircle, BadgeIndianRupee } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAppContext } from '@/contexts/AppContext';
 import { Badge } from '@/components/ui/badge';

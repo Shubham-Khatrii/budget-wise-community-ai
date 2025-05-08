@@ -43,6 +43,7 @@ interface AppContextType {
   markAllNotificationsAsRead: () => void;
   addContributionToGoal: (goalId: string, amount: number) => void;
   addGoal: (goal: Omit<Goal, 'id'>) => void;
+  formatCurrency: (amount: number) => string;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -119,7 +120,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     {
       id: 'n3',
       title: 'Goal Achievement',
-      message: 'Congratulations! You've reached 50% of your Emergency Fund goal',
+      message: "Congratulations! You've reached 50% of your Emergency Fund goal",
       date: '2025-04-25',
       read: true,
       type: 'success',
@@ -127,6 +128,11 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   ]);
 
   const [goals, setGoals] = useState<Goal[]>([]);
+
+  // Format currency as Indian Rupees
+  const formatCurrency = (amount: number): string => {
+    return `₹${amount.toLocaleString('en-IN')}`;
+  };
 
   // Calculate unread notifications count
   const unreadNotificationsCount = notifications.filter(n => !n.read).length;
@@ -145,12 +151,12 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     if (expense.amount > 5000) {
       addNotification({
         title: 'Large Expense',
-        message: `You spent ₹${expense.amount.toLocaleString('en-IN')} on ${expense.title}`,
+        message: `You spent ${formatCurrency(expense.amount)} on ${expense.title}`,
         type: 'info'
       });
     }
     
-    toast.success(`Added ₹${expense.amount.toLocaleString('en-IN')} expense for ${expense.title}`);
+    toast.success(`Added ${formatCurrency(expense.amount)} expense for ${expense.title}`);
   };
 
   // Add a new notification
@@ -200,12 +206,12 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     
     const goalTitle = goals.find(g => g.id === goalId)?.title;
     if (goalTitle) {
-      toast.success(`Added ₹${amount.toLocaleString('en-IN')} to ${goalTitle}`);
+      toast.success(`Added ${formatCurrency(amount)} to ${goalTitle}`);
       
       // Add notification for goal contributions
       addNotification({
         title: 'Goal Contribution',
-        message: `You added ₹${amount.toLocaleString('en-IN')} to your ${goalTitle} goal`,
+        message: `You added ${formatCurrency(amount)} to your ${goalTitle} goal`,
         type: 'success'
       });
     }
@@ -224,7 +230,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     // Add notification for new goal
     addNotification({
       title: 'New Goal Created',
-      message: `You created a new goal: ${goal.title} with target ₹${goal.targetAmount.toLocaleString('en-IN')}`,
+      message: `You created a new goal: ${goal.title} with target ${formatCurrency(goal.targetAmount)}`,
       type: 'success'
     });
   };
@@ -241,7 +247,8 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
         markNotificationAsRead,
         markAllNotificationsAsRead,
         addContributionToGoal,
-        addGoal
+        addGoal,
+        formatCurrency
       }}
     >
       {children}
