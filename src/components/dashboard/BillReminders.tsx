@@ -4,53 +4,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Check } from 'lucide-react';
-
-interface Bill {
-  id: string;
-  title: string;
-  amount: number;
-  dueDate: string;
-  status: 'Pending' | 'Paid' | 'Overdue';
-}
+import { useAppContext } from '@/contexts/AppContext';
 
 const BillReminders: React.FC = () => {
-  const [bills, setBills] = React.useState<Bill[]>([
-    {
-      id: 'b1',
-      title: 'Electricity Bill',
-      amount: 3499.75,
-      dueDate: '2025-05-05',
-      status: 'Pending',
-    },
-    {
-      id: 'b2',
-      title: 'Water Bill',
-      amount: 1235.30,
-      dueDate: '2025-05-10',
-      status: 'Pending',
-    },
-    {
-      id: 'b3',
-      title: 'Internet & Cable',
-      amount: 2199.99,
-      dueDate: '2025-05-15',
-      status: 'Pending',
-    },
-    {
-      id: 'b4',
-      title: 'Mobile Recharge',
-      amount: 999.00,
-      dueDate: '2025-05-22',
-      status: 'Pending',
-    },
-    {
-      id: 'b5',
-      title: 'Streaming Services',
-      amount: 649.98,
-      dueDate: '2025-05-28',
-      status: 'Pending',
-    }
-  ]);
+  const { bills, markBillAsPaid, formatCurrency } = useAppContext();
 
   // Format date to a more readable format
   const formatDate = (dateString: string): string => {
@@ -68,13 +25,6 @@ const BillReminders: React.FC = () => {
     const diffTime = dueDate.getTime() - today.getTime();
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     return diffDays;
-  };
-
-  // Mark bill as paid
-  const markAsPaid = (id: string): void => {
-    setBills(bills.map(bill => 
-      bill.id === id ? { ...bill, status: 'Paid' as const } : bill
-    ));
   };
 
   // Get status badge color
@@ -114,7 +64,7 @@ const BillReminders: React.FC = () => {
                       {bill.title}
                     </p>
                     <span className={`font-medium ${bill.status === 'Paid' ? 'text-muted-foreground' : ''}`}>
-                      ₹{bill.amount.toFixed(2)}
+                      {formatCurrency(bill.amount)}
                     </span>
                   </div>
                   <div className="flex justify-between items-center">
@@ -138,7 +88,7 @@ const BillReminders: React.FC = () => {
                     size="sm" 
                     variant="ghost" 
                     className="ml-2 h-8 w-8 p-0" 
-                    onClick={() => markAsPaid(bill.id)}
+                    onClick={() => markBillAsPaid(bill.id)}
                   >
                     <Check className="h-4 w-4" />
                     <span className="sr-only">Mark as paid</span>

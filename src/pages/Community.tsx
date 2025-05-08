@@ -1,54 +1,27 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import AppLayout from '@/components/layout/AppLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { MessageSquare, Users, Heart, ThumbsUp, Share2 } from 'lucide-react';
+import { useAppContext } from '@/contexts/AppContext';
+import { Textarea } from '@/components/ui/textarea';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 
 const Community: React.FC = () => {
-  const communityPosts = [
-    {
-      id: 'p1',
-      author: {
-        name: 'Priya Sharma',
-        avatar: 'https://i.pravatar.cc/150?img=1',
-        initials: 'PS',
-      },
-      timestamp: '2 hours ago',
-      content: 'I finally reached my emergency fund goal of ₹5 lakhs! It took me 18 months of consistent saving. So happy to have this financial safety net now.',
-      likes: 24,
-      comments: 8,
-      shares: 3,
-    },
-    {
-      id: 'p2',
-      author: {
-        name: 'Arjun Kumar',
-        avatar: 'https://i.pravatar.cc/150?img=2',
-        initials: 'AK',
-      },
-      timestamp: '5 hours ago',
-      content: 'Anyone have tips on reducing grocery expenses? My food budget keeps going over limit despite careful planning.',
-      likes: 16,
-      comments: 12,
-      shares: 0,
-    },
-    {
-      id: 'p3',
-      author: {
-        name: 'Meera Patel',
-        avatar: 'https://i.pravatar.cc/150?img=3',
-        initials: 'MP',
-      },
-      timestamp: '1 day ago',
-      content: 'Just switched to a better credit card with 2% cashback on all purchases and no annual fee. Already seeing savings on my monthly expenses!',
-      likes: 32,
-      comments: 4,
-      shares: 7,
-    }
-  ];
+  const { communityPosts, addCommunityPost, likePost } = useAppContext();
+  const [newPostContent, setNewPostContent] = useState('');
+  const [isPostingMode, setIsPostingMode] = useState(false);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const communityGroups = [
     {
@@ -81,6 +54,18 @@ const Community: React.FC = () => {
     },
   ];
 
+  const handlePostSubmit = () => {
+    if (!newPostContent.trim()) return;
+    
+    addCommunityPost({
+      content: newPostContent
+    });
+    
+    setNewPostContent('');
+    setIsPostingMode(false);
+    setIsDialogOpen(false);
+  };
+
   return (
     <AppLayout>
       <div className="animate-fade-in">
@@ -89,7 +74,7 @@ const Community: React.FC = () => {
             <h1 className="text-2xl md:text-3xl font-bold">Community</h1>
             <p className="text-muted-foreground">Connect with other users</p>
           </div>
-          <Button size="sm" className="flex items-center gap-1">
+          <Button size="sm" className="flex items-center gap-1" onClick={() => setIsDialogOpen(true)}>
             <MessageSquare className="h-4 w-4" />
             <span>New Post</span>
           </Button>
@@ -107,11 +92,14 @@ const Community: React.FC = () => {
                 <CardContent className="pt-6">
                   <div className="flex items-center gap-3 mb-4">
                     <Avatar>
-                      <AvatarImage src="https://github.com/shadcn.png" />
-                      <AvatarFallback>RJ</AvatarFallback>
+                      <AvatarImage src="https://i.pravatar.cc/150?img=8" />
+                      <AvatarFallback>YO</AvatarFallback>
                     </Avatar>
                     <div className="flex-1">
-                      <div className="bg-muted rounded-full px-4 py-2 cursor-pointer text-muted-foreground">
+                      <div 
+                        className="bg-muted rounded-full px-4 py-2 cursor-pointer text-muted-foreground"
+                        onClick={() => setIsDialogOpen(true)}
+                      >
                         Share your financial journey or ask a question...
                       </div>
                     </div>
@@ -148,7 +136,11 @@ const Community: React.FC = () => {
                     </div>
                     <p className="mb-4">{post.content}</p>
                     <div className="flex justify-between items-center pt-2 border-t">
-                      <Button variant="ghost" size="sm">
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => likePost(post.id)}
+                      >
                         <ThumbsUp className="h-4 w-4 mr-1" />
                         {post.likes}
                       </Button>
@@ -206,6 +198,36 @@ const Community: React.FC = () => {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* New Post Dialog */}
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogContent className="sm:max-w-[500px]">
+            <DialogHeader>
+              <DialogTitle>Create New Post</DialogTitle>
+              <DialogDescription>
+                Share your financial journey or ask a question to the community
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="grid gap-4 py-4">
+              <Textarea
+                placeholder="What's on your mind?"
+                className="min-h-[100px]"
+                value={newPostContent}
+                onChange={(e) => setNewPostContent(e.target.value)}
+              />
+            </div>
+            
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handlePostSubmit}>
+                Post
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </AppLayout>
   );

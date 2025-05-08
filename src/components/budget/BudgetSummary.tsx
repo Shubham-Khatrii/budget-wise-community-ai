@@ -5,12 +5,9 @@ import { Progress } from '@/components/ui/progress';
 import { useAppContext } from '@/contexts/AppContext';
 
 const BudgetSummary: React.FC = () => {
-  const { formatCurrency } = useAppContext();
+  const { monthlyBudget, totalSpent, remaining, formatCurrency } = useAppContext();
   
-  // Sample monthly budget data
-  const monthlyBudget = 325000;
-  const totalSpent = 293000;
-  const remaining = monthlyBudget - totalSpent;
+  // Calculate percentage spent
   const percentageSpent = Math.round((totalSpent / monthlyBudget) * 100);
   
   // Current month and year

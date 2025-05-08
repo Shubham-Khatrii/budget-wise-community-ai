@@ -1,6 +1,7 @@
-
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { toast } from "sonner";
+import { formatCurrency, formatDate } from "@/utils/formatters";
+import { PiggyBank, Plane, Car, Home } from 'lucide-react';
 
 // Define types for our data
 export interface Expense {
@@ -32,10 +33,31 @@ export interface Goal {
   priority: 'High' | 'Medium' | 'Low';
 }
 
+export interface Bill {
+  id: string;
+  title: string;
+  amount: number;
+  dueDate: string;
+  status: 'Pending' | 'Paid' | 'Overdue';
+}
+
+export interface BudgetCategory {
+  name: string;
+  spent: number;
+  budget: number;
+  color: string;
+}
+
 interface AppContextType {
   expenses: Expense[];
   notifications: Notification[];
   goals: Goal[];
+  bills: Bill[];
+  budgetCategories: BudgetCategory[];
+  monthlyBudget: number;
+  totalSpent: number;
+  remaining: number;
+  communityPosts: CommunityPost[];
   unreadNotificationsCount: number;
   addExpense: (expense: Omit<Expense, 'id' | 'date'>) => void;
   addNotification: (notification: Omit<Notification, 'id' | 'date' | 'read'>) => void;
@@ -43,7 +65,24 @@ interface AppContextType {
   markAllNotificationsAsRead: () => void;
   addContributionToGoal: (goalId: string, amount: number) => void;
   addGoal: (goal: Omit<Goal, 'id'>) => void;
+  markBillAsPaid: (id: string) => void;
+  addCommunityPost: (post: Omit<CommunityPost, 'id' | 'author' | 'timestamp' | 'likes' | 'comments' | 'shares'>) => void;
+  likePost: (postId: string) => void;
   formatCurrency: (amount: number) => string;
+}
+
+export interface CommunityPost {
+  id: string;
+  author: {
+    name: string;
+    avatar: string;
+    initials: string;
+  };
+  timestamp: string;
+  content: string;
+  likes: number;
+  comments: number;
+  shares: number;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -127,12 +166,151 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     }
   ]);
 
-  const [goals, setGoals] = useState<Goal[]>([]);
+  // Initialize budget categories
+  const [budgetCategories, setBudgetCategories] = useState<BudgetCategory[]>([
+    { name: 'Housing', spent: 120000, budget: 150000, color: '#0EA5E9' },
+    { name: 'Food', spent: 68000, budget: 65000, color: '#F97316' },
+    { name: 'Transportation', spent: 32000, budget: 40000, color: '#8B5CF6' },
+    { name: 'Entertainment', spent: 45000, budget: 40000, color: '#D946EF' },
+    { name: 'Utilities', spent: 28000, budget: 30000, color: '#10B981' },
+  ]);
 
-  // Format currency as Indian Rupees
-  const formatCurrency = (amount: number): string => {
-    return `₹${amount.toLocaleString('en-IN')}`;
-  };
+  // Initialize bills
+  const [bills, setBills] = useState<Bill[]>([
+    {
+      id: 'b1',
+      title: 'Electricity Bill',
+      amount: 3499.75,
+      dueDate: '2025-05-05',
+      status: 'Pending',
+    },
+    {
+      id: 'b2',
+      title: 'Water Bill',
+      amount: 1235.30,
+      dueDate: '2025-05-10',
+      status: 'Pending',
+    },
+    {
+      id: 'b3',
+      title: 'Internet & Cable',
+      amount: 2199.99,
+      dueDate: '2025-05-15',
+      status: 'Pending',
+    },
+    {
+      id: 'b4',
+      title: 'Mobile Recharge',
+      amount: 999.00,
+      dueDate: '2025-05-22',
+      status: 'Pending',
+    },
+    {
+      id: 'b5',
+      title: 'Streaming Services',
+      amount: 649.98,
+      dueDate: '2025-05-28',
+      status: 'Pending',
+    }
+  ]);
+
+  // Initialize initial goals with sample data
+  const initialGoals = [
+    {
+      id: 'g1',
+      title: 'Emergency Fund',
+      targetAmount: 1000000,
+      currentAmount: 750000,
+      dueDate: '2025-12-31',
+      icon: <PiggyBank className="h-4 w-4" />,
+      iconBg: 'bg-budget-blue/10 text-budget-blue',
+      priority: 'High' as 'High' | 'Medium' | 'Low',
+    },
+    {
+      id: 'g2',
+      title: 'Goa Vacation',
+      targetAmount: 200000,
+      currentAmount: 75000,
+      dueDate: '2026-06-15',
+      icon: <Plane className="h-4 w-4" />,
+      iconBg: 'bg-budget-purple/10 text-budget-purple',
+      priority: 'Medium' as 'High' | 'Medium' | 'Low',
+    },
+    {
+      id: 'g3',
+      title: 'New Car',
+      targetAmount: 1500000,
+      currentAmount: 500000,
+      dueDate: '2027-03-01',
+      icon: <Car className="h-4 w-4" />,
+      iconBg: 'bg-budget-green/10 text-budget-green',
+      priority: 'Medium' as 'High' | 'Medium' | 'Low',
+    },
+    {
+      id: 'g4',
+      title: 'Home Down Payment',
+      targetAmount: 5000000,
+      currentAmount: 1200000,
+      dueDate: '2028-01-01',
+      icon: <Home className="h-4 w-4" />,
+      iconBg: 'bg-budget-orange/10 text-budget-orange',
+      priority: 'High' as 'High' | 'Medium' | 'Low',
+    },
+  ];
+  
+  const [goals, setGoals] = useState<Goal[]>(initialGoals);
+
+  // Initialize community posts
+  const [communityPosts, setCommunityPosts] = useState<CommunityPost[]>([
+    {
+      id: 'p1',
+      author: {
+        name: 'Priya Sharma',
+        avatar: 'https://i.pravatar.cc/150?img=1',
+        initials: 'PS',
+      },
+      timestamp: '2 hours ago',
+      content: 'I finally reached my emergency fund goal of ₹5 lakhs! It took me 18 months of consistent saving. So happy to have this financial safety net now.',
+      likes: 24,
+      comments: 8,
+      shares: 3,
+    },
+    {
+      id: 'p2',
+      author: {
+        name: 'Arjun Kumar',
+        avatar: 'https://i.pravatar.cc/150?img=2',
+        initials: 'AK',
+      },
+      timestamp: '5 hours ago',
+      content: 'Anyone have tips on reducing grocery expenses? My food budget keeps going over limit despite careful planning.',
+      likes: 16,
+      comments: 12,
+      shares: 0,
+    },
+    {
+      id: 'p3',
+      author: {
+        name: 'Meera Patel',
+        avatar: 'https://i.pravatar.cc/150?img=3',
+        initials: 'MP',
+      },
+      timestamp: '1 day ago',
+      content: 'Just switched to a better credit card with 2% cashback on all purchases and no annual fee. Already seeing savings on my monthly expenses!',
+      likes: 32,
+      comments: 4,
+      shares: 7,
+    }
+  ]);
+
+  // Calculate total monthly budget
+  const monthlyBudget = budgetCategories.reduce((sum, cat) => sum + cat.budget, 0);
+  
+  // Calculate total spent amount
+  const totalSpent = budgetCategories.reduce((sum, cat) => sum + cat.spent, 0);
+  
+  // Calculate remaining budget
+  const remaining = monthlyBudget - totalSpent;
 
   // Calculate unread notifications count
   const unreadNotificationsCount = notifications.filter(n => !n.read).length;
@@ -146,6 +324,19 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     };
     
     setExpenses([newExpense, ...expenses]);
+    
+    // Update the budget category's spent amount
+    const updatedCategories = budgetCategories.map(category => {
+      if (category.name === expense.category) {
+        return {
+          ...category,
+          spent: category.spent + expense.amount
+        };
+      }
+      return category;
+    });
+    
+    setBudgetCategories(updatedCategories);
     
     // Create notification for large expenses (over ₹5000)
     if (expense.amount > 5000) {
@@ -235,12 +426,71 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     });
   };
 
+  // Mark a bill as paid
+  const markBillAsPaid = (id: string) => {
+    // Find the bill to get its amount
+    const bill = bills.find(b => b.id === id);
+    
+    if (bill) {
+      // Update bill status
+      setBills(
+        bills.map(bill => 
+          bill.id === id ? { ...bill, status: 'Paid' as const } : bill
+        )
+      );
+      
+      // Add an expense for the paid bill
+      addExpense({
+        title: `Paid: ${bill.title}`,
+        amount: bill.amount,
+        category: 'Utilities'
+      });
+      
+      toast.success(`${bill.title} marked as paid`);
+    }
+  };
+
+  // Add community post
+  const addCommunityPost = (post: Omit<CommunityPost, 'id' | 'author' | 'timestamp' | 'likes' | 'comments' | 'shares'>) => {
+    const newPost: CommunityPost = {
+      id: `p${communityPosts.length + 1}`,
+      author: {
+        name: 'You',
+        avatar: 'https://i.pravatar.cc/150?img=8',
+        initials: 'YO',
+      },
+      timestamp: 'Just now',
+      content: post.content,
+      likes: 0,
+      comments: 0,
+      shares: 0,
+    };
+    
+    setCommunityPosts([newPost, ...communityPosts]);
+    toast.success('Post added to community feed');
+  };
+  
+  // Like a post
+  const likePost = (postId: string) => {
+    setCommunityPosts(
+      communityPosts.map(post => 
+        post.id === postId ? { ...post, likes: post.likes + 1 } : post
+      )
+    );
+  };
+
   return (
     <AppContext.Provider
       value={{
         expenses,
         notifications,
         goals,
+        bills,
+        budgetCategories,
+        monthlyBudget,
+        totalSpent,
+        remaining,
+        communityPosts,
         unreadNotificationsCount,
         addExpense,
         addNotification,
@@ -248,6 +498,9 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
         markAllNotificationsAsRead,
         addContributionToGoal,
         addGoal,
+        markBillAsPaid,
+        addCommunityPost,
+        likePost,
         formatCurrency
       }}
     >

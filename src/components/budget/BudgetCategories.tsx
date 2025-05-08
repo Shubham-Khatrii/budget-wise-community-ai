@@ -5,25 +5,9 @@ import { ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAppContext } from '@/contexts/AppContext';
 
-interface BudgetCategory {
-  name: string;
-  spent: number;
-  budget: number;
-  color: string;
-}
-
 const BudgetCategories: React.FC = () => {
-  const { formatCurrency } = useAppContext();
+  const { budgetCategories, formatCurrency } = useAppContext();
   
-  // Sample budget categories data
-  const categories: BudgetCategory[] = [
-    { name: 'Housing', spent: 120000, budget: 150000, color: '#0EA5E9' },
-    { name: 'Food', spent: 68000, budget: 65000, color: '#F97316' },
-    { name: 'Transportation', spent: 32000, budget: 40000, color: '#8B5CF6' },
-    { name: 'Entertainment', spent: 45000, budget: 40000, color: '#D946EF' },
-    { name: 'Utilities', spent: 28000, budget: 30000, color: '#10B981' },
-  ];
-
   return (
     <Card>
       <CardHeader>
@@ -32,7 +16,7 @@ const BudgetCategories: React.FC = () => {
       </CardHeader>
       <CardContent>
         <div className="space-y-6">
-          {categories.map((category) => {
+          {budgetCategories.map((category) => {
             const percentage = Math.round((category.spent / category.budget) * 100);
             const isOverBudget = category.spent > category.budget;
             
