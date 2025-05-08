@@ -9,7 +9,6 @@ import RecentTransactions from '@/components/dashboard/RecentTransactions';
 import FinancialGoals from '@/components/dashboard/FinancialGoals';
 import BillReminders from '@/components/dashboard/BillReminders';
 import AIInsights from '@/components/dashboard/AIInsights';
-import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { PlusCircle } from 'lucide-react';
 import {
@@ -29,10 +28,12 @@ import {
 } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useAppContext } from '@/contexts/AppContext';
 
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
-  const { toast } = useToast();
+  const { addExpense } = useAppContext();
+  
   const [isAddExpenseOpen, setIsAddExpenseOpen] = useState(false);
   const [newExpense, setNewExpense] = useState({
     title: '',
@@ -48,18 +49,14 @@ const Dashboard: React.FC = () => {
     e.preventDefault();
     
     if (!newExpense.title || !newExpense.amount || !newExpense.category) {
-      toast({
-        title: "Error",
-        description: "Please fill in all fields",
-        variant: "destructive",
-      });
       return;
     }
-
-    // In a real app, this would make an API call to add the expense
-    toast({
-      title: "Expense Added",
-      description: `Added ₹${parseFloat(newExpense.amount).toLocaleString('en-IN')} expense for ${newExpense.title}`,
+    
+    // Add the new expense to our context
+    addExpense({
+      title: newExpense.title,
+      amount: parseFloat(newExpense.amount),
+      category: newExpense.category,
     });
 
     // Reset form and close modal
@@ -188,13 +185,13 @@ const Dashboard: React.FC = () => {
                       <SelectValue placeholder="Select category" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="housing">Housing</SelectItem>
-                      <SelectItem value="food">Food</SelectItem>
-                      <SelectItem value="transportation">Transportation</SelectItem>
-                      <SelectItem value="entertainment">Entertainment</SelectItem>
-                      <SelectItem value="utilities">Utilities</SelectItem>
-                      <SelectItem value="health">Health</SelectItem>
-                      <SelectItem value="others">Others</SelectItem>
+                      <SelectItem value="Housing">Housing</SelectItem>
+                      <SelectItem value="Food">Food</SelectItem>
+                      <SelectItem value="Transportation">Transportation</SelectItem>
+                      <SelectItem value="Entertainment">Entertainment</SelectItem>
+                      <SelectItem value="Utilities">Utilities</SelectItem>
+                      <SelectItem value="Health">Health</SelectItem>
+                      <SelectItem value="Others">Others</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

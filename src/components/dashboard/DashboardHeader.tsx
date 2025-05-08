@@ -10,8 +10,10 @@ import {
   DropdownMenuSeparator, 
   DropdownMenuTrigger 
 } from '@/components/ui/dropdown-menu';
-import { PlusCircle } from 'lucide-react';
+import { Bell, PlusCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useAppContext } from '@/contexts/AppContext';
+import { Badge } from '@/components/ui/badge';
 
 interface DashboardHeaderProps {
   onAddExpense?: () => void;
@@ -19,6 +21,7 @@ interface DashboardHeaderProps {
 
 const DashboardHeader: React.FC<DashboardHeaderProps> = ({ onAddExpense }) => {
   const navigate = useNavigate();
+  const { unreadNotificationsCount } = useAppContext();
 
   const handleMenuAction = (action: string) => {
     switch(action) {
@@ -44,6 +47,21 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ onAddExpense }) => {
         <p className="text-muted-foreground">Welcome back, Rahul! Here's your financial overview.</p>
       </div>
       <div className="flex items-center space-x-3">
+        <Button 
+          variant="outline" 
+          size="icon" 
+          className="relative"
+          onClick={() => navigate('/notifications')}
+        >
+          <Bell className="h-4 w-4" />
+          {unreadNotificationsCount > 0 && (
+            <Badge 
+              className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 bg-destructive text-destructive-foreground text-xs"
+            >
+              {unreadNotificationsCount}
+            </Badge>
+          )}
+        </Button>
         <Button 
           size="sm" 
           className="flex items-center gap-1"

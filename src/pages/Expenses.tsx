@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import AppLayout from '@/components/layout/AppLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, Filter, ArrowUpDown, Search } from 'lucide-react';
+import { PlusCircle, Filter, Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { 
   Select,
@@ -20,33 +20,28 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-
-interface Expense {
-  id: string;
-  date: string;
-  description: string;
-  category: string;
-  amount: number;
-}
+import { useAppContext } from '@/contexts/AppContext';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
 
 const Expenses: React.FC = () => {
+  const { expenses, addExpense } = useAppContext();
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
+  const [isAddExpenseOpen, setIsAddExpenseOpen] = useState(false);
+  const [newExpense, setNewExpense] = useState({
+    title: '',
+    amount: '',
+    category: '',
+  });
   
-  // Sample expenses data
-  const expenses: Expense[] = [
-    { id: 'e1', date: '2025-04-28', description: 'Grocery Shopping', category: 'Food', amount: 2800 },
-    { id: 'e2', date: '2025-04-26', description: 'Movie Tickets', category: 'Entertainment', amount: 1200 },
-    { id: 'e3', date: '2025-04-25', description: 'Internet Bill', category: 'Utilities', amount: 1999 },
-    { id: 'e4', date: '2025-04-25', description: 'Fuel', category: 'Transportation', amount: 2500 },
-    { id: 'e5', date: '2025-04-23', description: 'Restaurant Dinner', category: 'Food', amount: 3500 },
-    { id: 'e6', date: '2025-04-22', description: 'Medicine', category: 'Health', amount: 850 },
-    { id: 'e7', date: '2025-04-20', description: 'Clothing', category: 'Shopping', amount: 5699 },
-    { id: 'e8', date: '2025-04-18', description: 'Mobile Recharge', category: 'Utilities', amount: 499 },
-    { id: 'e9', date: '2025-04-15', description: 'Gym Membership', category: 'Health', amount: 2499 },
-    { id: 'e10', date: '2025-04-15', description: 'Office Supplies', category: 'Work', amount: 750 },
-  ];
-
   // Format date
   const formatDate = (dateString: string): string => {
     const date = new Date(dateString);
@@ -64,7 +59,7 @@ const Expenses: React.FC = () => {
 
   // Filter expenses based on search query and category
   const filteredExpenses = expenses.filter(expense => {
-    const matchesSearch = expense.description.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    const matchesSearch = expense.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
                          expense.category.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = categoryFilter === 'all' || expense.category === categoryFilter;
     
@@ -74,6 +69,26 @@ const Expenses: React.FC = () => {
   // Get unique categories from expenses
   const categories = Array.from(new Set(expenses.map(expense => expense.category)));
 
+  // Handle adding a new expense
+  const handleAddExpenseSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!newExpense.title || !newExpense.amount || !newExpense.category) {
+      return;
+    }
+    
+    // Add the expense
+    addExpense({
+      title: newExpense.title,
+      amount: parseFloat(newExpense.amount),
+      category: newExpense.category,
+    });
+
+    // Reset form and close dialog
+    setNewExpense({ title: '', amount: '', category: '' });
+    setIsAddExpenseOpen(false);
+  };
+
   return (
     <AppLayout>
       <div className="animate-fade-in">
@@ -82,7 +97,11 @@ const Expenses: React.FC = () => {
             <h1 className="text-2xl md:text-3xl font-bold">Expenses</h1>
             <p className="text-muted-foreground">Track and manage your spending</p>
           </div>
-          <Button size="sm" className="flex items-center gap-1">
+          <Button 
+            size="sm" 
+            className="flex items-center gap-1"
+            onClick={() => setIsAddExpenseOpen(true)}
+          >
             <PlusCircle className="h-4 w-4" />
             <span>Add Expense</span>
           </Button>
@@ -139,7 +158,7 @@ const Expenses: React.FC = () => {
                     filteredExpenses.map((expense) => (
                       <TableRow key={expense.id}>
                         <TableCell>{formatDate(expense.date)}</TableCell>
-                        <TableCell className="font-medium">{expense.description}</TableCell>
+                        <TableCell className="font-medium">{expense.title}</TableCell>
                         <TableCell>{expense.category}</TableCell>
                         <TableCell className="text-right text-destructive font-medium">
                           {formatAmount(expense.amount)}
@@ -174,6 +193,75 @@ const Expenses: React.FC = () => {
             )}
           </CardContent>
         </Card>
+
+        {/* Add Expense Dialog */}
+        <Dialog open={isAddExpenseOpen} onOpenChange={setIsAddExpenseOpen}>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Add New Expense</DialogTitle>
+              <DialogDescription>
+                Enter the details of your new expense.
+              </DialogDescription>
+            </DialogHeader>
+            <form onSubmit={handleAddExpenseSubmit}>
+              <div className="grid gap-4 py-4">
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="title" className="text-right">
+                    Title
+                  </Label>
+                  <Input
+                    id="title"
+                    value={newExpense.title}
+                    onChange={(e) => setNewExpense({...newExpense, title: e.target.value})}
+                    className="col-span-3"
+                    placeholder="Grocery Shopping"
+                  />
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="amount" className="text-right">
+                    Amount (₹)
+                  </Label>
+                  <Input
+                    id="amount"
+                    type="number"
+                    value={newExpense.amount}
+                    onChange={(e) => setNewExpense({...newExpense, amount: e.target.value})}
+                    className="col-span-3"
+                    placeholder="5000"
+                  />
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="category" className="text-right">
+                    Category
+                  </Label>
+                  <Select
+                    value={newExpense.category}
+                    onValueChange={(value) => setNewExpense({...newExpense, category: value})}
+                  >
+                    <SelectTrigger className="col-span-3">
+                      <SelectValue placeholder="Select category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Housing">Housing</SelectItem>
+                      <SelectItem value="Food">Food</SelectItem>
+                      <SelectItem value="Transportation">Transportation</SelectItem>
+                      <SelectItem value="Entertainment">Entertainment</SelectItem>
+                      <SelectItem value="Utilities">Utilities</SelectItem>
+                      <SelectItem value="Health">Health</SelectItem>
+                      <SelectItem value="Others">Others</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <DialogFooter>
+                <Button variant="outline" type="button" onClick={() => setIsAddExpenseOpen(false)}>
+                  Cancel
+                </Button>
+                <Button type="submit">Add Expense</Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
       </div>
     </AppLayout>
   );

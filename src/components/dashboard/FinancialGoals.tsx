@@ -22,27 +22,24 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { useToast } from '@/hooks/use-toast';
-
-interface Goal {
-  id: string;
-  title: string;
-  targetAmount: number;
-  currentAmount: number;
-  dueDate: string;
-  icon: React.ReactNode;
-  iconBg: string;
-  priority: 'High' | 'Medium' | 'Low';
-}
+import { useAppContext } from '@/contexts/AppContext';
 
 const FinancialGoals: React.FC = () => {
-  const { toast } = useToast();
+  const { goals, addGoal, addContributionToGoal } = useAppContext();
   const [isAddGoalOpen, setIsAddGoalOpen] = useState(false);
   const [isContributeOpen, setIsContributeOpen] = useState(false);
   const [selectedGoalId, setSelectedGoalId] = useState<string | null>(null);
   const [contributionAmount, setContributionAmount] = useState('');
   
-  const [goals, setGoals] = useState<Goal[]>([
+  const [newGoal, setNewGoal] = useState({
+    title: '',
+    targetAmount: '',
+    dueDate: '',
+    priority: 'Medium' as 'High' | 'Medium' | 'Low',
+  });
+
+  // Predefined goals for initial state
+  const initialGoals = [
     {
       id: 'g1',
       title: 'Emergency Fund',
@@ -51,7 +48,7 @@ const FinancialGoals: React.FC = () => {
       dueDate: '2025-12-31',
       icon: <PiggyBank className="h-4 w-4" />,
       iconBg: 'bg-budget-blue/10 text-budget-blue',
-      priority: 'High',
+      priority: 'High' as 'High' | 'Medium' | 'Low',
     },
     {
       id: 'g2',
@@ -61,7 +58,7 @@ const FinancialGoals: React.FC = () => {
       dueDate: '2026-06-15',
       icon: <Plane className="h-4 w-4" />,
       iconBg: 'bg-budget-purple/10 text-budget-purple',
-      priority: 'Medium',
+      priority: 'Medium' as 'High' | 'Medium' | 'Low',
     },
     {
       id: 'g3',
@@ -71,7 +68,7 @@ const FinancialGoals: React.FC = () => {
       dueDate: '2027-03-01',
       icon: <Car className="h-4 w-4" />,
       iconBg: 'bg-budget-green/10 text-budget-green',
-      priority: 'Medium',
+      priority: 'Medium' as 'High' | 'Medium' | 'Low',
     },
     {
       id: 'g4',
@@ -81,16 +78,12 @@ const FinancialGoals: React.FC = () => {
       dueDate: '2028-01-01',
       icon: <Home className="h-4 w-4" />,
       iconBg: 'bg-budget-orange/10 text-budget-orange',
-      priority: 'High',
+      priority: 'High' as 'High' | 'Medium' | 'Low',
     },
-  ]);
+  ];
 
-  const [newGoal, setNewGoal] = useState({
-    title: '',
-    targetAmount: '',
-    dueDate: '',
-    priority: 'Medium' as 'High' | 'Medium' | 'Low',
-  });
+  // Use either context goals or initial goals if context is empty
+  const displayGoals = goals.length > 0 ? goals : initialGoals;
 
   // Calculate progress percentage
   const calculateProgress = (current: number, target: number): number => {
@@ -124,11 +117,6 @@ const FinancialGoals: React.FC = () => {
     e.preventDefault();
     
     if (!newGoal.title || !newGoal.targetAmount || !newGoal.dueDate) {
-      toast({
-        title: "Error",
-        description: "Please fill in all fields",
-        variant: "destructive",
-      });
       return;
     }
 
@@ -141,8 +129,7 @@ const FinancialGoals: React.FC = () => {
     
     const randomIcon = iconOptions[Math.floor(Math.random() * iconOptions.length)];
     
-    const newGoalObj: Goal = {
-      id: `g${goals.length + 1}`,
+    addGoal({
       title: newGoal.title,
       targetAmount: parseFloat(newGoal.targetAmount),
       currentAmount: 0,
@@ -150,9 +137,8 @@ const FinancialGoals: React.FC = () => {
       icon: randomIcon.icon,
       iconBg: randomIcon.bg,
       priority: newGoal.priority,
-    };
+    });
     
-    setGoals([...goals, newGoalObj]);
     setNewGoal({
       title: '',
       targetAmount: '',
@@ -161,11 +147,6 @@ const FinancialGoals: React.FC = () => {
     });
     
     setIsAddGoalOpen(false);
-    
-    toast({
-      title: "Goal Added",
-      description: `${newGoal.title} added to your financial goals`,
-    });
   };
 
   const openContributeDialog = (goalId: string) => {
@@ -177,38 +158,18 @@ const FinancialGoals: React.FC = () => {
     e.preventDefault();
     
     if (!contributionAmount || !selectedGoalId) {
-      toast({
-        title: "Error",
-        description: "Please enter a valid amount",
-        variant: "destructive",
-      });
       return;
     }
     
     const amount = parseFloat(contributionAmount);
     if (isNaN(amount) || amount <= 0) {
-      toast({
-        title: "Error",
-        description: "Please enter a valid amount",
-        variant: "destructive",
-      });
       return;
     }
     
-    setGoals(goals.map(goal => 
-      goal.id === selectedGoalId 
-        ? { ...goal, currentAmount: goal.currentAmount + amount } 
-        : goal
-    ));
+    addContributionToGoal(selectedGoalId, amount);
     
     setContributionAmount('');
     setIsContributeOpen(false);
-    
-    const goalTitle = goals.find(g => g.id === selectedGoalId)?.title;
-    toast({
-      title: "Contribution Added",
-      description: `Added ₹${amount.toLocaleString('en-IN')} to ${goalTitle}`,
-    });
   };
 
   return (
@@ -224,7 +185,7 @@ const FinancialGoals: React.FC = () => {
       </CardHeader>
       <CardContent>
         <div className="space-y-6">
-          {goals.map((goal) => {
+          {displayGoals.map((goal) => {
             const progress = calculateProgress(goal.currentAmount, goal.targetAmount);
             
             return (
